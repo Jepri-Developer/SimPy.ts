@@ -1,0 +1,14 @@
+{
+  "name": "hello-world",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "simpy build",
+    "typecheck": "simpy build && tsc --noEmit"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.0",
+    "typescript": "^5.8.0"
+  }
+}

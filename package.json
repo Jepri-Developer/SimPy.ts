@@ -1,0 +1,19 @@
+{
+  "name": "simpy-ts",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Tooling TypeScript untuk SimPy.ts (runtime frontend ada di src/frontend).",
+  "license": "MIT",
+  "type": "module",
+  "engines": { "node": ">=22.18" },
+  "scripts": {
+    "test": "node --test \"tests/frontend/**/*.test.ts\"",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "typecheck:tests": "tsc --noEmit -p tsconfig.tests.json"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "esbuild": "^0.28.0",
+    "typescript": "^5.8.0"
+  }
+}

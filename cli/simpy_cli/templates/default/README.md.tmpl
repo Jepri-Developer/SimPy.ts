@@ -1,0 +1,18 @@
+# {{name}}
+
+Project SimPy.ts.
+
+```bash
+npm install              # esbuild + typescript (sekali saja)
+cp .env.example .env     # lalu isi SIMPY_SECRET_KEY
+simpy dev                # backend + klien API + build frontend (watch)
+```
+
+Buka http://127.0.0.1:8000, isi nama, lalu klik "Sapa" (halaman memanggil `/api/greet`).
+
+- Route backend ada di `app/routes.py`. Tipe respons ditulis lewat anotasi return.
+- Setelah mengubah route atau Schema, jalankan `simpy generate` (atau restart `simpy dev`)
+  agar klien TypeScript `.simpy/api.ts` ikut diperbarui.
+- Halaman ada di `pages/` (satu file = satu route). Panggil API dengan
+  `import { api } from "simpy-ts/api"`.
+- Build produksi: `simpy build --minify`.

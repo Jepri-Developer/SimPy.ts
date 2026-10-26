@@ -1,0 +1,85 @@
+"""Route backend untuk hello-world."""
+
+from simpy import (
+    HTTPError,
+    Schema,
+    Session,
+    SimPy,
+    UserExists,
+    field,
+    load_settings,
+    login,
+    logout,
+)
+
+# Gagal start bila SIMPY_SECRET_KEY belum diisi (lihat .env.example).
+# Secure headers, CSRF, dan rate limiting aktif secara otomatis.
+app = SimPy(settings=load_settings())
+
+
+class Message(Schema):
+    message: str
+
+
+class GreetInput(Schema):
+    name: str = field(min_length=1, max_length=50)
+
+
+class Credentials(Schema):
+    username: str = field(min_length=3, max_length=32, pattern=r"[A-Za-z0-9_.-]+")
+    password: str = field(min_length=8, max_length=128)
+
+
+class UserOut(Schema):
+    id: str
+    username: str
+
+
+# Anotasi return menentukan tipe respons: dicek saat runtime dan dipakai `simpy generate`
+# untuk membuat klien TypeScript bertipe (.simpy/api.ts).
+@app.get("/api/hello")
+def hello() -> Message:
+    return {"message": "Hello from hello-world"}
+
+
+@app.post("/api/greet")
+def greet(data: GreetInput) -> Message:
+    return {"message": f"Halo, {data.name}!"}
+
+
+# Handler `def` biasa dijalankan di thread terpisah, jadi hashing password tidak
+# memblokir server.
+@app.post("/api/register", rate_limit="5/minute")
+def register(request, data: Credentials) -> UserOut:
+    try:
+        user = app.users.create(data.username, data.password)
+    except UserExists:
+        raise HTTPError(409, "Username sudah dipakai.") from None
+    login(request, user.id)
+    return {"id": user.id, "username": user.username}, 201
+
+
+@app.post("/api/login", rate_limit="10/minute")
+def sign_in(request, data: Credentials) -> UserOut:
+    user = app.users.authenticate(data.username, data.password)
+    if user is None:
+        raise HTTPError(401, "Username atau password salah.", code="invalid_credentials")
+    login(request, user.id)
+    return {"id": user.id, "username": user.username}
+
+
+@app.post("/api/logout")
+def sign_out(request) -> None:
+    logout(request)
+
+
+@app.get("/api/me", auth=True)
+def me(session: Session) -> UserOut:
+    user = app.users.get(session.user_id)
+    if user is None:
+        raise HTTPError(401, "Perlu login.")
+    return {"id": user.id, "username": user.username}
+
+
+# Sajikan frontend hasil `simpy build` (folder dist/). Harus setelah route API.
+app.serve_frontend()
