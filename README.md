@@ -37,7 +37,7 @@ const reply = await api.greet({ name: "Ani" });   // reply: Message
 ## Instalasi
 
 ```bash
-git clone <url-repo-kamu> SimPy.ts      # ganti dengan URL repo GitHub kamu
+git clone https://github.com/Jepri-Developer/SimPy.ts.git
 cd SimPy.ts
 python -m venv .venv
 source .venv/bin/activate               # Windows: .venv\Scripts\activate
